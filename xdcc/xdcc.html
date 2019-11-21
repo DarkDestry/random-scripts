@@ -60,6 +60,10 @@
         //     "[HorribleSubs] Choyoyu",
         //     "[HorribleSubs] Honzuki no Gekokujou"
         // ]
+        
+        if(getCookie("queryList") === "") {
+            setCookie("queryList", JSON.stringify([]), 180);
+        }
 
         function addClick() {
             addQuery(document.getElementById("input").value);
