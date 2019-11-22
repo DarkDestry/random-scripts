@@ -170,16 +170,16 @@
                 document.getElementById("table").innerHTML += msg;
             }
 
-            function writeClipboard(msg) {
-                navigator.clipboard.writeText(msg)
-                .then(() => {
-                    // Success!
-                })
-                .catch(err => {
-                    console.log('Something went wrong', err);
-                });
-            }
+        }
 
+        function writeClipboard(msg) {
+            navigator.clipboard.writeText(msg)
+            .then(() => {
+                // Success!
+            })
+            .catch(err => {
+                console.log('Something went wrong', err);
+            });
         }
 
         function setCookie(cname, cvalue, exdays) {
