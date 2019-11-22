@@ -24,6 +24,7 @@
 <body>
 
     <h2>XDCC Tracker</h2>
+    <a href="https://github.com/DarkDestry/random-scripts/tree/master/xdcc"> Usage Instructions </a>
 
     <div>
         <button type="button" onclick="refresh()">Refresh</button>   
@@ -106,6 +107,10 @@
             var counter = 0;
 
             var searchList = JSON.parse(getCookie("queryList"));
+            if (searchList.length === 0) {
+                document.getElementById("table").innerHTML = "<tr>Query List is empty. Add some above.</tr>";
+                return;
+            }
 
             for (let i = 0; i < searchList.length; i++) {
                 var searchTerm = searchList[i];
