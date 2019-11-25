@@ -40,10 +40,14 @@
         </select>
     </div>
     <div style="padding-top: 1em">
-        <button type="button" onclick="addClick()">Add</button>   
-        <button type="button" onclick="removeClick()">Remove</button>   
-        <select id="queryDropdown"></select>
-        <input id="input" style="width: 20em;"/>
+        <div style="display: inline-block; padding-right: 3em;">
+            <button type="button" onclick="removeClick()">Remove</button>   
+            <select id="queryDropdown"></select>
+        </div>
+        <div style="display: inline-block">
+            <button type="button" onclick="addClick()">Add</button>   
+            <input id="input" style="width: 20em;"/>
+        </div>
     </div>
 
     <!-- Query Content -->
