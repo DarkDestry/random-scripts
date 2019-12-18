@@ -1,341 +1,245 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <style>
-            tr {
-                border-top: 1px dashed grey;
-                border-bottom: 1px dashed grey;
-                padding: 2px;
-                height: 1.1em;
-            }
-            tr:hover {
-                background: rgb(207, 207, 207);
-            }
-            table {
-                width: 900px;
-                border-collapse: collapse;
-            }
-            td {
-            }
-        </style>
-    </head>
 
-    <body>
-        <div id="app">
-            <h2>XDCC Tracker</h2>
-            <a
-                href="https://github.com/DarkDestry/random-scripts/tree/master/xdcc"
-            >
-                Usage Instructions
-            </a>
+<head>
+    <style>
+        tr {
+            border-top: 1px dashed grey;
+            border-bottom: 1px dashed grey;
+            padding: 2px;
+            height: 1.1em;
+        }
 
-            <div style="padding-top: 1em">
-                <button type="button" onclick="refresh()">Refresh</button>
-                <select id="server" v-model="server">
-                    <option value="CR-HOLLAND|NEW">CR-HOLLAND|NEW</option>
-                    <option value="CR-RALEIGH|NEW">CR-RALEIGH|NEW</option>
-                    <option value="Ginpachi-Sensei">Ginpachi-Sensei</option>
-                </select>
-                <select id="quality" v-model="quality">
-                    <option value="[1080p]">[1080p]</option>
-                    <option value="[720p]">[720p]</option>
-                    <option value="[480p]">[480p]</option>
-                </select>
+        tr:hover {
+            background: rgb(207, 207, 207);
+        }
+
+        table {
+            width: 900px;
+            border-collapse: collapse;
+        }
+
+        td {}
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h2>XDCC Tracker</h2>
+        <a href="https://github.com/DarkDestry/random-scripts/tree/master/xdcc">
+            Usage Instructions
+        </a>
+
+        <div style="padding-top: 1em">
+            <button type="button" onclick="app.getEntries()">Refresh</button>
+            <select id="server" v-model="server">
+                <option value="CR-HOLLAND|NEW">CR-HOLLAND|NEW</option>
+                <option value="CR-RALEIGH|NEW">CR-RALEIGH|NEW</option>
+                <option value="Ginpachi-Sensei">Ginpachi-Sensei</option>
+            </select>
+            <select id="quality" v-model="quality">
+                <option value="[1080p]">[1080p]</option>
+                <option value="[720p]">[720p]</option>
+                <option value="[480p]">[480p]</option>
+            </select>
+        </div>
+        <div style="padding-top: 1em">
+            <div style="display: inline-block; padding-right: 3em;">
+                <button type="button" onclick="removeClick()">
+                    Remove
+                </button>
+                <select id="queryDropdown"></select>
             </div>
-            <div style="padding-top: 1em">
-                <div style="display: inline-block; padding-right: 3em;">
-                    <button type="button" onclick="removeClick()">
-                        Remove
-                    </button>
-                    <select id="queryDropdown"></select>
-                </div>
-                <div style="display: inline-block">
-                    <button type="button" onclick="addClick()">Add</button>
-                    <input id="input" style="width: 20em;" />
-                </div>
+            <div style="display: inline-block">
+                <button type="button" onclick="addClick()">Add</button>
+                <input id="input" style="width: 20em;" />
             </div>
-
-            <p>
-                Latest
-            </p>
-            <table>
-                <tr
-                    v-for="entry in latest"
-                    @click="writeClipboard(entry.command)"
-                >
-                    <td>{{ entry.name }}</td>
-                    <td>{{ entry.command }}</td>
-                </tr>
-            </table>
-
-            <p>
-                Full Output
-            </p>
-            <table>
-                <tr
-                    v-for="entry in result"
-                    @click="writeClipboard(entry.command)"
-                >
-                    <td>{{ entry.name }}</td>
-                    <td>{{ entry.command }}</td>
-                </tr>
-            </table>
         </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-        <script>
-            function setCookie(cname, cvalue, exdays) {
-                var d = new Date();
-                d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-                var expires = "expires=" + d.toUTCString();
-                document.cookie =
-                    cname + "=" + cvalue + ";" + expires + ";path=/";
-            }
+        <p>
+            Latest
+        </p>
+        <table>
+            <tr v-for="entry in latest" @click="writeClipboard(entry.command)">
+                <td>{{ entry.name }}</td>
+                <td>{{ entry.command }}</td>
+                <td>{{ toMoment(entry.firstSeen).format('L') }}</td>
+                <td style="color: red">{{ entry.label }}</td>
+            </tr>
+        </table>
 
-            function getCookie(cname) {
-                var name = cname + "=";
-                var decodedCookie = decodeURIComponent(document.cookie);
-                var ca = decodedCookie.split(";");
-                for (var i = 0; i < ca.length; i++) {
-                    var c = ca[i];
-                    while (c.charAt(0) == " ") {
-                        c = c.substring(1);
-                    }
-                    if (c.indexOf(name) == 0) {
-                        return c.substring(name.length, c.length);
-                    }
+        <p>
+            Full Output
+        </p>
+        <table>
+            <tr v-for="entry in result" @click="writeClipboard(entry.command)">
+                <td>{{ entry.name }}</td>
+                <td>{{ entry.command }}</td>
+                <td>{{ toMoment(entry.firstSeen).format('L') }}</td>
+                <td style="color: red">{{ entry.label }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script>
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+            var expires = "expires=" + d.toUTCString();
+            document.cookie =
+                cname + "=" + cvalue + ";" + expires + ";path=/";
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(";");
+            console.log(decodedCookie);
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == " ") {
+                    c = c.substring(1);
                 }
-                return "[]";
+                if (c.indexOf(name) == 0) {
+                    return c.substring(name.length, c.length);
+                }
             }
-            const app = new Vue({
-                el: "#app",
-                data: {
-                    latest: [],
-                    result: [],
-                    server: "CR-HOLLAND|NEW",
-                    quality: "[1080p]"
+            return "";
+        }
+
+        const app = new Vue({
+            el: "#app",
+            data: {
+                latest: [],
+                result: [],
+                firstSeen: {},
+                server: "CR-HOLLAND|NEW",
+                quality: "[1080p]"
+            },
+            mounted() {
+                if (getCookie("queryList") === "") {
+                    setCookie("queryList", JSON.stringify([]), 180);
+                }
+                if (getCookie("firstSeen") === "") {
+                    setCookie("firstSeen", JSON.stringify({}), 180);
+                }
+                this.firstSeen = JSON.parse(getCookie("firstSeen"));
+                this.getEntries();
+            },
+            methods: {
+
+                toMoment(obj) {
+                    return moment(obj);
                 },
-                mounted() {
-                    if (getCookie("queryList") === "") {
-                        setCookie("queryList", JSON.stringify([]), 180);
+                getEntries() {
+                    this.latest = [];
+                    this.result = [];
+                    const searchList = JSON.parse(getCookie("queryList"));
+                    const promises = [];
+                    for (let searchTerm of searchList) {
+                        let url = `https://cors-anywhere.herokuapp.com/https://xdcc.horriblesubs.info/search.php?nick=${this.server}&t=${searchTerm}`;
+                        url += ` ${this.quality}`;
+                        url.replace(" ", "%20");
+                        promises.push(axios.post(url));
                     }
-
-                    this.getEntries();
-                },
-                methods: {
-                    getEntries() {
-                        this.latest = [];
-                        this.result = [];
-                        const searchList = JSON.parse(getCookie("queryList"));
-                        const promises = [];
-                        for (let searchTerm of searchList) {
-                            let url = `https://cors-anywhere.herokuapp.com/https://xdcc.horriblesubs.info/search.php?nick=${this.server}&t=${searchTerm}`;
-                            url += ` ${this.quality}`;
-                            url.replace(" ", "%20");
-                            promises.push(axios.post(url));
-                        }
-                        Promise.all(promises).then(entriess => {
-                            // build the list of result and latest
-                            for (let entries of entriess) {
-                                eval(entries.data);
-                                p.k.forEach(x => {
-                                    const name = x.f.substring(
-                                        15,
-                                        x.f.length - (5 + this.quality.length)
-                                    );
-                                    const command = `/msg ${x.b} xdcc send #${x.n}`;
-
-                                    this.result.push({ name, command });
-                                });
-
-                                this.latest.push(
-                                    this.result[this.result.length - 1]
-                                );
-                                p = { k: [] };
-                            }
-
-                            // use the list of result and latest
-                            // for (let x of latest) {
-                            //     this.entries.push({
-                            //         name,
-                            //         command
-                            //     });
-                            // }
-
-                            // for (let x of result) {
-                            //     const name = x.f.substring(
-                            //         15,
-                            //         x.f.length - (5 + this.quality.length)
-                            //     );
-                            //     const command = `/msg ${x.b} xdcc send #${x.n}`;
-                            //     this.entries.push({
-                            //         name,
-                            //         command
-                            //     });
-                            // }
-                        });
-                    },
-                    writeClipboard(msg) {
-                        navigator.clipboard
-                            .writeText(msg)
-                            .then(() => {
-                                console.log("added" + msg);
-                                // Success!
-                            })
-                            .catch(err => {
-                                console.log("Something went wrong", err);
-                            });
-                    }
-                }
-            });
-            var p = { k: [] };
-            //formatting - TODO: use tables
-            var maxLength = 0;
-
-            // searchList = [
-            //     "[HorribleSubs] Psycho Pass 3",
-            //     "[HorribleSubs] Sword Art Online - Alicization - War of Underworld",
-            //     "[HorribleSubs] Choyoyu",
-            //     "[HorribleSubs] Honzuki no Gekokujou"
-            // ]
-
-            if (getCookie("queryList") === "") {
-                setCookie("queryList", JSON.stringify([]), 180);
-            }
-
-            function addClick() {
-                addQuery(document.getElementById("input").value);
-                updateDropdown();
-            }
-            function removeClick() {
-                removeQuery(document.getElementById("queryDropdown").value);
-                updateDropdown();
-            }
-            function updateDropdown() {
-                var str = "";
-                JSON.parse(getCookie("queryList")).forEach(element => {
-                    str += `<option value='${element}'>${element}</option>`;
-                });
-                document.getElementById("queryDropdown").innerHTML = str;
-            }
-            updateDropdown();
-
-            function addQuery(str) {
-                var searchList = JSON.parse(getCookie("queryList"));
-                searchList.push(str);
-                setCookie("queryList", JSON.stringify(searchList), 180);
-            }
-            function removeQuery(str) {
-                var searchList = JSON.parse(getCookie("queryList"));
-                for (var i = searchList.length - 1; i >= 0; i--) {
-                    if (searchList[i] === str) {
-                        searchList.splice(i, 1);
-                    }
-                }
-                setCookie("queryList", JSON.stringify(searchList), 180);
-            }
-
-            function refresh() {
-                var server = document.getElementById("server").value;
-                var quality = document.getElementById("quality").value;
-                document.getElementById("table").innerHTML =
-                    "<tr>Refreshing...</tr>";
-                var result = [];
-                var latest = [];
-                var counter = 0;
-
-                var searchList = JSON.parse(getCookie("queryList"));
-                if (searchList.length === 0) {
-                    document.getElementById("table").innerHTML =
-                        "<tr>Query List is empty. Add some above.</tr>";
-                    return;
-                }
-
-                for (let i = 0; i < searchList.length; i++) {
-                    var searchTerm = searchList[i];
-                    searchTerm += ` ${quality}`;
-                    searchTerm.replace(" ", "%20");
-
-                    var xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function() {
-                        if (this.readyState == 4 && this.status == 200) {
-                            //   document.getElementById("demo").innerHTML = this.responseText;
-                            eval(this.responseText);
-
+                    Promise.all(promises).then(entriess => {
+                        // build the list of result and latest
+                        for (let entries of entriess) {
+                            eval(entries.data);
                             p.k.forEach(x => {
-                                result.push(x);
-                                maxLength = Math.max(
-                                    maxLength,
-                                    x.f.length - 27
+                                const name = x.f.substring(
+                                    15,
+                                    x.f.length - (5 + this.quality.length)
                                 );
+                                const command = `/msg ${x.b} xdcc send #${x.n}`;
+                                if (this.firstSeen[name] === undefined) {
+                                    this.firstSeen[name] = {};
+                                }
+                                if (this.firstSeen[name].date === undefined) {
+                                    this.firstSeen[name].date = moment().toObject();
+                                }
+                                const isNew = moment(this.firstSeen[name].date) > moment().subtract(1, 'day');
+                                const label = isNew ? 'N' : '';
+                                this.result.push({ name, command, firstSeen: this.firstSeen[name].date, label });
                             });
-
-                            latest.push(p.k[p.k.length - 1]);
-
+                            this.latest.push(
+                                this.result[this.result.length - 1]
+                            );
                             p = { k: [] };
-
-                            done();
                         }
-                    };
-                    xhttp.open(
-                        "POST",
-                        `https://cors-anywhere.herokuapp.com/https://xdcc.horriblesubs.info/search.php?nick=${server}&t=${searchTerm}`,
-                        true
-                    );
-                    xhttp.send();
-                }
-
-                function done() {
-                    if (counter !== searchList.length - 1) {
-                        counter++;
-                    } else {
-                        document.getElementById("table").innerHTML = "";
-
-                        write("<tr />");
-                        write("<tr> Latest Entries:  </tr>");
-                        latest.forEach(x => {
-                            var name = x.f.substring(
-                                15,
-                                x.f.length - (5 + quality.length)
-                            );
-                            var command = `/msg ${x.b} xdcc send #${x.n}`;
-                            write(
-                                `<tr onclick="writeClipboard('${command}');"><td>${name}</td> <td>${command}</td></tr>`
-                            );
-                        });
-
-                        write("<tr />");
-                        write("<tr> Full Output </tr>");
-
-                        result.forEach(x => {
-                            var name = x.f.substring(
-                                15,
-                                x.f.length - (5 + quality.length)
-                            );
-                            var command = `/msg ${x.b} xdcc send #${x.n}`;
-                            write(
-                                `<tr onclick="writeClipboard('${command}');"><td>${name}</td> <td>${command}</td></tr>`
-                            );
-                        });
-                    }
-                }
-
-                function write(msg) {
-                    document.getElementById("table").innerHTML += msg;
-                }
-            }
-
-            function writeClipboard(msg) {
-                navigator.clipboard
-                    .writeText(msg)
-                    .then(() => {
-                        // Success!
-                    })
-                    .catch(err => {
-                        console.log("Something went wrong", err);
+                        setCookie("firstSeen", JSON.stringify(this.firstSeen), 180);
                     });
+                },
+                writeClipboard(msg) {
+                    navigator.clipboard
+                        .writeText(msg)
+                        .then(() => {
+                            console.log("added" + msg);
+                            // Success!
+                        })
+                        .catch(err => {
+                            console.log("Something went wrong", err);
+                        });
+                }
             }
-        </script>
-    </body>
+        });
+        var p = { k: [] };
+
+        //formatting - TODO: use tables
+        var maxLength = 0;
+        // searchList = [
+        //     "[HorribleSubs] Psycho Pass 3",
+        //     "[HorribleSubs] Sword Art Online - Alicization - War of Underworld",
+        //     "[HorribleSubs] Choyoyu",
+        //     "[HorribleSubs] Honzuki no Gekokujou"
+        // ]
+        if (getCookie("queryList") === "") {
+            setCookie("queryList", JSON.stringify([]), 180);
+        }
+        function addClick() {
+            addQuery(document.getElementById("input").value);
+            updateDropdown();
+        }
+        function removeClick() {
+            removeQuery(document.getElementById("queryDropdown").value);
+            updateDropdown();
+        }
+        function updateDropdown() {
+            var str = "";
+            JSON.parse(getCookie("queryList")).forEach(element => {
+                str += `<option value='${element}'>${element}</option>`;
+            });
+            document.getElementById("queryDropdown").innerHTML = str;
+        }
+        updateDropdown();
+        function addQuery(str) {
+            var searchList = JSON.parse(getCookie("queryList"));
+            searchList.push(str);
+            setCookie("queryList", JSON.stringify(searchList), 180);
+        }
+        function removeQuery(str) {
+            var searchList = JSON.parse(getCookie("queryList"));
+            for (var i = searchList.length - 1; i >= 0; i--) {
+                if (searchList[i] === str) {
+                    searchList.splice(i, 1);
+                }
+            }
+            setCookie("queryList", JSON.stringify(searchList), 180);
+        }
+        function writeClipboard(msg) {
+            navigator.clipboard
+                .writeText(msg)
+                .then(() => {
+                    // Success!
+                })
+                .catch(err => {
+                    console.log("Something went wrong", err);
+                });
+        }
+    </script>
+</body>
+
 </html>
