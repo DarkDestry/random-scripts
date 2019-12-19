@@ -56,29 +56,35 @@
             </div>
         </div>
 
-        <p>
-            Latest
-        </p>
-        <table>
-            <tr v-for="entry in latest" @click="writeClipboard(entry.command)">
-                <td>{{ entry.name }}</td>
-                <td>{{ entry.command }}</td>
-                <td>{{ toMoment(entry.firstSeen).format('L') }}</td>
-                <td style="color: red">{{ entry.label }}</td>
-            </tr>
-        </table>
+        <template v-if='showContent'>
+            <template v-if='this.result.length > 0'>
+                <p>
+                    Latest
+                </p>
+                <table>
+                    <tr v-for="entry in latest" @click="writeClipboard(entry.command)">
+                        <td>{{ entry.name }}</td>
+                        <td>{{ entry.command }}</td>
+                        <td>{{ toMoment(entry.firstSeen).format('L') }}</td>
+                        <td style="color: red">{{ entry.label }}</td>
+                    </tr>
+                </table>
 
-        <p>
-            Full Output
-        </p>
-        <table>
-            <tr v-for="entry in result" @click="writeClipboard(entry.command)">
-                <td>{{ entry.name }}</td>
-                <td>{{ entry.command }}</td>
-                <td>{{ toMoment(entry.firstSeen).format('L') }}</td>
-                <td style="color: red">{{ entry.label }}</td>
-            </tr>
-        </table>
+                <p>
+                    Full Output
+                </p>
+                <table>
+                    <tr v-for="entry in result" @click="writeClipboard(entry.command)">
+                        <td>{{ entry.name }}</td>
+                        <td>{{ entry.command }}</td>
+                        <td>{{ toMoment(entry.firstSeen).format('L') }}</td>
+                        <td style="color: red">{{ entry.label }}</td>
+                    </tr>
+                </table>
+            </template>
+            <p v-else> Refreshing... </p>
+        </template>
+        <p v-else> Query List is empty. Add a new query above. </p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -97,7 +103,6 @@
             var name = cname + "=";
             var decodedCookie = decodeURIComponent(document.cookie);
             var ca = decodedCookie.split(";");
-            console.log(decodedCookie);
             for (var i = 0; i < ca.length; i++) {
                 var c = ca[i];
                 while (c.charAt(0) == " ") {
@@ -117,7 +122,8 @@
                 result: [],
                 firstSeen: {},
                 server: "CR-HOLLAND|NEW",
-                quality: "[1080p]"
+                quality: "[1080p]",
+                showContent: false
             },
             mounted() {
                 if (getCookie("queryList") === "") {
@@ -126,6 +132,7 @@
                 if (getCookie("firstSeen") === "") {
                     setCookie("firstSeen", JSON.stringify({}), 180);
                 }
+                this.showContent = this.getQueryList().length > 0;
                 this.firstSeen = JSON.parse(getCookie("firstSeen"));
                 this.getEntries();
             },
@@ -139,6 +146,7 @@
                     this.result = [];
                     const searchList = JSON.parse(getCookie("queryList"));
                     const promises = [];
+                    this.showContent = this.getQueryList().length > 0;
                     for (let searchTerm of searchList) {
                         let url = `https://cors-anywhere.herokuapp.com/https://xdcc.horriblesubs.info/search.php?nick=${this.server}&t=${searchTerm}`;
                         url += ` ${this.quality}`;
@@ -183,6 +191,9 @@
                         .catch(err => {
                             console.log("Something went wrong", err);
                         });
+                },
+                getQueryList() {
+                    return JSON.parse(getCookie("queryList"));
                 }
             }
         });
@@ -198,6 +209,20 @@
         // ]
         if (getCookie("queryList") === "") {
             setCookie("queryList", JSON.stringify([]), 180);
+        }
+        function addQuery(str) {
+            var searchList = JSON.parse(getCookie("queryList"));
+            searchList.push(str);
+            setCookie("queryList", JSON.stringify(searchList), 180);
+        }
+        function removeQuery(str) {
+            var searchList = JSON.parse(getCookie("queryList"));
+            for (var i = searchList.length - 1; i >= 0; i--) {
+                if (searchList[i] === str) {
+                    searchList.splice(i, 1);
+                }
+            }
+            setCookie("queryList", JSON.stringify(searchList), 180);
         }
         function addClick() {
             addQuery(document.getElementById("input").value);
@@ -215,20 +240,6 @@
             document.getElementById("queryDropdown").innerHTML = str;
         }
         updateDropdown();
-        function addQuery(str) {
-            var searchList = JSON.parse(getCookie("queryList"));
-            searchList.push(str);
-            setCookie("queryList", JSON.stringify(searchList), 180);
-        }
-        function removeQuery(str) {
-            var searchList = JSON.parse(getCookie("queryList"));
-            for (var i = searchList.length - 1; i >= 0; i--) {
-                if (searchList[i] === str) {
-                    searchList.splice(i, 1);
-                }
-            }
-            setCookie("queryList", JSON.stringify(searchList), 180);
-        }
         function writeClipboard(msg) {
             navigator.clipboard
                 .writeText(msg)
