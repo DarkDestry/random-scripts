@@ -3,6 +3,38 @@
 
 <head>
     <style>
+        :root {
+            --primary-color: #302AE6;
+            --secondary-color: #536390;
+            --font-color: #424242;
+            --bg-color: #fff;
+            --heading-color: #292922;
+            --hover-color: rgb(207, 207, 207);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #ccc;
+            --secondary-color: #fff;
+            --font-color: #ccc;
+            --bg-color: #212121;
+            --heading-color: #818cab;
+            --hover-color: rgb(0, 0, 0);
+        }
+
+        a {
+            color: var(--secondary-color);
+
+        }
+
+        h1 {
+            color: var(--secondary-color);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--font-color);
+        }
+
         tr {
             border-top: 1px dashed grey;
             border-bottom: 1px dashed grey;
@@ -11,25 +43,29 @@
         }
 
         tr:hover {
-            background: rgb(207, 207, 207);
+            background: var(--hover-color);
         }
 
         table {
             width: 900px;
             border-collapse: collapse;
         }
-
-        td {}
     </style>
 </head>
 
 <body>
     <div id="app">
         <h2>XDCC Tracker</h2>
-        <a href="https://github.com/DarkDestry/random-scripts/tree/master/xdcc">
-            Usage Instructions
-        </a>
 
+        <div>
+            <a href="https://github.com/DarkDestry/random-scripts/tree/master/xdcc">
+                Usage Instructions
+            </a>
+            <span style="padding-left:3em">
+                <a href="#" v-show="!this.darkTheme" @click="toggleTheme()">Dark Theme</a>
+                <a href="#" v-show="this.darkTheme" @click="toggleTheme()">Light Theme</a>
+            </span>
+        </div>
         <div style="padding-top: 1em">
             <button type="button" onclick="app.getEntries()">Refresh</button>
             <select id="server" v-model="server">
@@ -92,6 +128,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script>
 
+
         function setCookie(name, value, exdays) {
             if (typeof (Storage) !== "undefined") {
                 localStorage.setItem(name, value);
@@ -152,7 +189,8 @@
                 firstSeen: {},
                 server: "CR-HOLLAND|NEW",
                 quality: "[1080p]",
-                showContent: false
+                showContent: false,
+                darkTheme: false
             },
             mounted() {
                 if (getCookie("queryList") === "") {
@@ -164,9 +202,26 @@
                 this.showContent = this.getQueryList().length > 0;
                 this.firstSeen = JSON.parse(getCookie("firstSeen"));
                 this.getEntries();
+                const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+
+                if (currentTheme) {
+                    document.documentElement.setAttribute('data-theme', currentTheme);
+                }
             },
             methods: {
 
+                toggleTheme() {
+                    if (this.darkTheme) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                        localStorage.setItem('theme', 'dark');
+                        this.darkTheme = !this.darkTheme;
+                    }
+                    else {
+                        document.documentElement.setAttribute('data-theme', 'light');
+                        localStorage.setItem('theme', 'light');
+                        this.darkTheme = !this.darkTheme;
+                    }
+                },
                 toMoment(obj) {
                     return moment(obj);
                 },
