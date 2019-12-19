@@ -27,6 +27,9 @@ Second row:
 -- Used for removing search terms.
 -- Select the search term you want to remove and click Remove.
 
+Date - When is it this script first seen the anime
+Red N - The listing is last seen within a day
+
 ### NodeJS version
 
 - Put script in folder
