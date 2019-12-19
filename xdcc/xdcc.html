@@ -91,12 +91,31 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
     <script>
-        function setCookie(cname, cvalue, exdays) {
-            var d = new Date();
-            d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-            var expires = "expires=" + d.toUTCString();
-            document.cookie =
-                cname + "=" + cvalue + ";" + expires + ";path=/";
+
+        function setCookie(name, value, exdays) {
+
+            options = {
+                path: '/',
+                'max-age': exdays * 24 * 60 * 60,
+                // add other defaults here if necessary
+
+            };
+
+            if (options.expires && options.expires.toUTCString) {
+                options.expires = options.expires.toUTCString();
+            }
+
+            let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+
+            for (let optionKey in options) {
+                updatedCookie += "; " + optionKey;
+                let optionValue = options[optionKey];
+                if (optionValue !== true) {
+                    updatedCookie += "=" + optionValue;
+                }
+            }
+
+            document.cookie = updatedCookie;
         }
 
         function getCookie(cname) {
