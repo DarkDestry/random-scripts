@@ -93,6 +93,10 @@
         </div>
 
         <template v-if='showContent'>
+            <p v-if='this.queries != this.getQueryList().length'> 
+                Refreshing... {{ this.queries + "/" + this.getQueryList().length }}
+            </p>
+            <p v-else> Done </p>
             <template v-if='this.result.length > 0'>
                 <p>
                     Latest
@@ -118,7 +122,6 @@
                     </tr>
                 </table>
             </template>
-            <p v-else> Refreshing... </p>
         </template>
         <p v-else> Query List is empty. Add a new query above. </p>
     </div>
@@ -190,7 +193,9 @@
                 server: "CR-HOLLAND|NEW",
                 quality: "[1080p]",
                 showContent: false,
-                darkTheme: false
+                darkTheme: false,
+                pLock: false,
+                queries: 0
             },
             mounted() {
                 if (getCookie("queryList") === "") {
@@ -231,16 +236,16 @@
                     const searchList = JSON.parse(getCookie("queryList"));
                     const promises = [];
                     this.showContent = this.getQueryList().length > 0;
+                    this.queries = 0;
                     for (let searchTerm of searchList) {
                         let url = `https://cors-anywhere.herokuapp.com/https://xdcc.horriblesubs.info/search.php?nick=${this.server}&t=${searchTerm}`;
                         url += ` ${this.quality}`;
                         url.replace(" ", "%20");
-                        promises.push(axios.post(url));
-                    }
-                    Promise.all(promises).then(entriess => {
-                        // build the list of result and latest
-                        for (let entries of entriess) {
-                            eval(entries.data);
+                        promises.push(axios.post(url).then(entry => {
+                            // build the list of result and latest
+                            while(this.pLock){}
+                            this.pLock = true;
+                            eval(entry.data);
                             p.k.forEach(x => {
                                 const name = x.f.substring(
                                     15,
@@ -261,9 +266,12 @@
                                 this.result[this.result.length - 1]
                             );
                             p = { k: [] };
-                        }
-                        setCookie("firstSeen", JSON.stringify(this.firstSeen), 180);
-                    });
+                            this.pLock = false;
+                            setCookie("firstSeen", JSON.stringify(this.firstSeen), 180);
+                            this.queries++;
+                        }));
+                    }
+                    Promise.all(promises);
                 },
                 writeClipboard(msg) {
                     navigator.clipboard
