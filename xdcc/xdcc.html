@@ -238,7 +238,7 @@
                     this.showContent = this.getQueryList().length > 0;
                     this.queries = 0;
                     for (let searchTerm of searchList) {
-                        let url = `https://cors-anywhere.herokuapp.com/https://xdcc.horriblesubs.info/search.php?nick=${this.server}&t=${searchTerm}`;
+                        let url = `https://cors.darkdestry.workers.dev/?https://xdcc.horriblesubs.info/search.php?nick=${this.server}&t=${searchTerm}`;
                         url += ` ${this.quality}`;
                         url.replace(" ", "%20");
                         promises.push(axios.post(url).then(entry => {
