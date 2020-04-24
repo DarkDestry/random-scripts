@@ -72,6 +72,8 @@
                 <option value="CR-HOLLAND|NEW">CR-HOLLAND|NEW</option>
                 <option value="CR-RALEIGH|NEW">CR-RALEIGH|NEW</option>
                 <option value="Ginpachi-Sensei">Ginpachi-Sensei</option>
+                <option value="CR-ARCHIVE|">CR-ARCHIVE</option>
+                
             </select>
             <select id="quality" v-model="quality">
                 <option value="[1080p]">[1080p]</option>
@@ -238,7 +240,9 @@
                     this.showContent = this.getQueryList().length > 0;
                     this.queries = 0;
                     for (let searchTerm of searchList) {
-                        let url = `https://cors.darkdestry.workers.dev/?https://xdcc.horriblesubs.info/search.php?nick=${this.server}&t=${searchTerm}`;
+                        var queryServer = this.server;
+                        if (queryServer.includes("CR-ARCHIVE")) queryServer += this.quality.substring(1, this.quality.length-1);
+                        let url = `https://cors.darkdestry.workers.dev/?https://xdcc.horriblesubs.info/search.php?nick=${queryServer}&t=${searchTerm}`;
                         url += ` ${this.quality}`;
                         url.replace(" ", "%20");
                         promises.push(axios.post(url).then(entry => {
