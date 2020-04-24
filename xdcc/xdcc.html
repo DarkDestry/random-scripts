@@ -244,35 +244,37 @@
                         promises.push(axios.post(url).then(entry => {
                             // build the list of result and latest
                             while(this.pLock){}
-                            this.pLock = true;
                             if (entry.data != "" && entry.data != null) {
+                                this.pLock = true;
                                 try {
                                     eval(entry.data);
+
+                                    p.k.forEach(x => {
+                                        const name = x.f.substring(
+                                            15,
+                                            x.f.length - (5 + this.quality.length)
+                                        );
+                                        const command = `/msg ${x.b} xdcc send #${x.n}`;
+                                        if (this.firstSeen[name] === undefined) {
+                                            this.firstSeen[name] = {};
+                                        }
+                                        if (this.firstSeen[name].date === undefined) {
+                                            this.firstSeen[name].date = moment().toObject();
+                                        }
+                                        const isNew = moment(this.firstSeen[name].date) > moment().subtract(1, 'day');
+                                        const label = isNew ? 'N' : '';
+                                        this.result.push({ name, command, firstSeen: this.firstSeen[name].date, label });
+                                    });
+                                    this.latest.push(
+                                        this.result[this.result.length - 1]
+                                    );
+                                    p = { k: [] };
+                                    setCookie("firstSeen", JSON.stringify(this.firstSeen), 180);
                                 } catch (e) {
                                     Console.error(e)
+                                } finally {
+                                    this.pLock = false;
                                 }
-                                p.k.forEach(x => {
-                                    const name = x.f.substring(
-                                        15,
-                                        x.f.length - (5 + this.quality.length)
-                                    );
-                                    const command = `/msg ${x.b} xdcc send #${x.n}`;
-                                    if (this.firstSeen[name] === undefined) {
-                                        this.firstSeen[name] = {};
-                                    }
-                                    if (this.firstSeen[name].date === undefined) {
-                                        this.firstSeen[name].date = moment().toObject();
-                                    }
-                                    const isNew = moment(this.firstSeen[name].date) > moment().subtract(1, 'day');
-                                    const label = isNew ? 'N' : '';
-                                    this.result.push({ name, command, firstSeen: this.firstSeen[name].date, label });
-                                });
-                                this.latest.push(
-                                    this.result[this.result.length - 1]
-                                );
-                                p = { k: [] };
-                                this.pLock = false;
-                                setCookie("firstSeen", JSON.stringify(this.firstSeen), 180);
                             }
                             this.queries++;
                         }));
