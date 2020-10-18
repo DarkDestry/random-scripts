@@ -254,10 +254,7 @@
                                     eval(entry.data);
 
                                     p.k.forEach(x => {
-                                        const name = x.f.substring(
-                                            15,
-                                            x.f.length - (5 + this.quality.length)
-                                        );
+                                        const name = x.f.match(new RegExp(`\\[.+?\\] (.+) .+?${quality}`))[1];
                                         const command = `/msg ${x.b} xdcc send #${x.n}`;
                                         if (this.firstSeen[name] === undefined) {
                                             this.firstSeen[name] = {};
